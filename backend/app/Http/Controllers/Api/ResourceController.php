@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreResourceRequest;
+use App\Http\Requests\UpdateResourceRequest;
 use App\Models\Resource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,5 +56,30 @@ class ResourceController extends Controller
             ->firstOrFail();
 
         return response()->json(['data' => $resource]);
+    }
+
+    public function store(StoreResourceRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $data['author_id'] = $request->user()->id;
+        $data['published_at'] = $data['published_at'] ?? now();
+
+        $resource = Resource::create($data);
+
+        return response()->json(['data' => $resource->load(['topic:id,name,slug', 'author:id,name'])], 201);
+    }
+
+    public function update(UpdateResourceRequest $request, Resource $resource): JsonResponse
+    {
+        $resource->update($request->validated());
+
+        return response()->json(['data' => $resource->load(['topic:id,name,slug', 'author:id,name'])]);
+    }
+
+    public function destroy(Resource $resource): JsonResponse
+    {
+        $resource->delete();
+
+        return response()->json(null, 204);
     }
 }
