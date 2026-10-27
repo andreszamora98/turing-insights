@@ -1,0 +1,154 @@
+{
+  "info": {
+    "name": "turing-insights",
+    "_postman_id": "a1b2c3d4-0000-4000-8000-000000000001",
+    "description": "Colección de pruebas para TuringInsights (Laravel + Vue). API base: {{base_url}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 · Resources · Público",
+      "item": [
+        {
+          "name": "List all",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources",
+              "host": ["{{base_url}}"],
+              "path": ["resources"]
+            }
+          }
+        },
+        {
+          "name": "Page 2",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?page=2",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "page", "value": "2" }]
+            }
+          }
+        },
+        {
+          "name": "Filter by topic · backend",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?topic=backend",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "topic", "value": "backend" }]
+            }
+          }
+        },
+        {
+          "name": "Filter by topic · desarrollo-web",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?topic=desarrollo-web",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "topic", "value": "desarrollo-web" }]
+            }
+          }
+        },
+        {
+          "name": "Search · laravel",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?search=laravel",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "search", "value": "laravel" }]
+            }
+          }
+        },
+        {
+          "name": "Sort · old",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?sort=old",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "sort", "value": "old" }]
+            }
+          }
+        },
+        {
+          "name": "Per page · 3",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?per_page=3",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "per_page", "value": "3" }]
+            }
+          }
+        },
+        {
+          "name": "Topic inexistente (vacío)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources?topic=inexistente",
+              "host": ["{{base_url}}"],
+              "path": ["resources"],
+              "query": [{ "key": "topic", "value": "inexistente" }]
+            }
+          }
+        },
+        {
+          "name": "Show by slug",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources/{{resource_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["resources", "{{resource_slug}}"]
+            }
+          }
+        },
+        {
+          "name": "Show · not found (404)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources/no-existe",
+              "host": ["{{base_url}}"],
+              "path": ["resources", "no-existe"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 · Auth · JWT",
+      "item": []
+    },
+    {
+      "name": "03 · Resources · Admin",
+      "item": []
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "resource_slug", "value": "introduccion-a-vue-3-y-la-composition-api" }
+  ]
+}
