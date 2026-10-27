@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+import { IconArrowRight } from '@tabler/icons-vue'
 defineProps({
   resource: { type: Object, required: true },
 })
@@ -38,12 +40,13 @@ function formatDate(value) {
         {{ resource.author?.name }} · {{ formatDate(resource.published_at) }}
       </div>
 
-      <a
-        :href="`#/recursos/${resource.slug}`"
-        class="text-brand-teal font-semibold text-sm hover:text-brand-dark transition"
-      >
+      <RouterLink
+        :to="{ name: 'resource-detail', params: { slug: resource.slug } }"
+        class="inline-flex items-center gap-1 text-brand-teal font-semibold text-sm hover:text-brand-dark transition"
+        >
         Leer recurso
-      </a>
+        <IconArrowRight :size="16" />
+      </RouterLink>
     </div>
   </article>
 </template>
