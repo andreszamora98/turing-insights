@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/resources', [ResourceController::class, 'index']);
-Route::get('/resources/{slug}', [ResourceController::class, 'show']);
 Route::get('/topics', [TopicController::class, 'index']);
 
 Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('/resources/{slug}', [ResourceController::class, 'show']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 

@@ -9,7 +9,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', name: 'home', component: Home },
-    { path: '/recursos/:slug', name: 'resource-detail', component: ResourceDetail },
+    { path: '/recursos/:slug', name: 'resource-detail', component: ResourceDetail, meta: { requiresAuth: true } },
     { path: '/acerca-de', name: 'about', component: AboutView },
     { path: '/contacto', name: 'contact', component: ContactView },
     { path: '/login', name: 'login', component: LoginView },
@@ -45,7 +45,7 @@ router.beforeEach((to) => {
   const user = JSON.parse(localStorage.getItem('auth_user') || 'null')
 
   if (to.meta.requiresAuth && !token) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 
   if (to.meta.requiresAdmin && user?.role !== 'admin') {

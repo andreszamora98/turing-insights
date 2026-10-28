@@ -1,11 +1,12 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { IconMail, IconLock, IconAlertCircle } from '@tabler/icons-vue'
 import { useAuth } from '../composables/useAuth'
 import AppHeader from '../components/AppHeader.vue'
 import AppFooter from '../components/AppFooter.vue'
 
+const route = useRoute()
 const router = useRouter()
 const { login } = useAuth()
 
@@ -17,15 +18,27 @@ const error = ref(null)
 async function onSubmit() {
   error.value = null
   loading.value = true
+
+  let user
   try {
-    const user = await login(email.value, password.value)
-    if (user.role === 'admin') {
-      router.push('/admin')
+    user = await login(email.value, password.value)
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Correo o contraseña incorrectos'
+    loading.value = false
+    return
+  }
+
+  try {
+    const redirect = route.query.redirect
+    if (redirect) {
+      await router.push(String(redirect))
+    } else if (user.role === 'admin') {
+      await router.push('/admin')
     } else {
-      router.push('/')
+      await router.push('/')
     }
   } catch (e) {
-    error.value = e.response?.data?.message || 'No se pudo iniciar sesión'
+    console.error('Error al redirigir tras el login:', e)
   } finally {
     loading.value = false
   }
