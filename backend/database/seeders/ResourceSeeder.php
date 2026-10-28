@@ -23,6 +23,7 @@ class ResourceSeeder extends Seeder
                     'Con ref y reactive se define el estado reactivo, con computed los valores derivados y con watch los efectos secundarios. Además, la lógica se puede extraer a funciones llamadas composables, que se reutilizan entre componentes sin mixins ni jerarquías complejas.',
                 ],
                 'days' => 1,
+                'cover' => 'introduccion-vue-3.jpg',
             ],
             [
                 'topic' => 'Desarrollo web',
@@ -33,6 +34,7 @@ class ResourceSeeder extends Seeder
                     'Para el diseño responsive se utilizan prefijos como sm, md y lg. Una cuadrícula que muestra una columna en móvil, dos en tablet y tres en escritorio se resuelve con tres clases, sin media queries manuales.',
                 ],
                 'days' => 2,
+                'cover' => 'tailwind-responsive.jpg',
             ],
             [
                 'topic' => 'Desarrollo web',
@@ -43,6 +45,7 @@ class ResourceSeeder extends Seeder
                     'Las mejoras más rentables suelen ser servir imágenes en formatos modernos y con tamaños adecuados, dividir el código en fragmentos que se cargan bajo demanda y evitar peticiones innecesarias a la API usando paginación y caché.',
                 ],
                 'days' => 3,
+                'cover' => 'rendimiento-web.jpg',
             ],
             [
                 'topic' => 'Bases de datos',
@@ -53,6 +56,7 @@ class ResourceSeeder extends Seeder
                     'La tercera forma normal pide que los atributos no clave no dependan de otros atributos no clave. Separar temas, autores y recursos en tablas relacionadas por claves foráneas es un ejemplo cotidiano de 3FN.',
                 ],
                 'days' => 4,
+                'cover' => 'normalizacion-bd.jpg',
             ],
             [
                 'topic' => 'Bases de datos',
@@ -63,6 +67,7 @@ class ResourceSeeder extends Seeder
                     'La instrucción EXPLAIN muestra si una consulta usa un índice o hace un escaneo completo. Conviene recordar que cada índice adicional ocupa espacio y vuelve más costosas las escrituras, así que se crean con criterio.',
                 ],
                 'days' => 5,
+                'cover' => 'indices-mysql.jpg',
             ],
             [
                 'topic' => 'Bases de datos',
@@ -73,6 +78,7 @@ class ResourceSeeder extends Seeder
                     'Este diseño simplifica las consultas de agregación y mejora el rendimiento de los tableros. Un buen punto de partida es definir primero la pregunta de negocio y, a partir de ella, elegir el nivel de detalle de la tabla de hechos.',
                 ],
                 'days' => 6,
+                'cover' => 'modelado-analitica.jpg',
             ],
             [
                 'topic' => 'Backend',
@@ -83,6 +89,7 @@ class ResourceSeeder extends Seeder
                     'Conviene validar siempre la entrada, devolver códigos de estado coherentes y paginar las colecciones. Así, los clientes de la API reciben respuestas consistentes y los errores son fáciles de interpretar.',
                 ],
                 'days' => 7,
+                'cover' => 'apis-rest-laravel.jpg',
             ],
             [
                 'topic' => 'Backend',
@@ -93,6 +100,7 @@ class ResourceSeeder extends Seeder
                     'Las rutas protegidas se agrupan con el middleware auth:sanctum, y el cierre de sesión revoca el token actual. Sobre esta base se pueden añadir roles, como administrador y usuario, para controlar quién puede escribir.',
                 ],
                 'days' => 8,
+                'cover' => 'sanctum-laravel.jpg',
             ],
             [
                 'topic' => 'Backend',
@@ -103,6 +111,7 @@ class ResourceSeeder extends Seeder
                     'Además, el programador de tareas de Laravel permite definir procesos recurrentes en código, como generar reportes cada noche. Es una base sencilla para automatizar flujos de trabajo sin depender de múltiples scripts sueltos.',
                 ],
                 'days' => 9,
+                'cover' => 'colas-jobs-laravel.jpg',
             ],
         ];
 
@@ -114,7 +123,7 @@ class ResourceSeeder extends Seeder
                 [
                     'excerpt' => $item['excerpt'],
                     'content' => implode("\n\n", $item['content']),
-                    'cover_url' => 'https://picsum.photos/seed/' . md5($item['title']) . '/800/450',
+                    'cover_url' => asset('images/covers/' . $item['cover']),
                     'topic_id' => $topic->id,
                     'author_id' => $author->id,
                     'published_at' => now()->subDays($item['days'])->setTime(9, 0),
