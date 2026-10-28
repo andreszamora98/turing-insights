@@ -36,10 +36,10 @@ async function onSubmit() {
   <div class="min-h-screen flex flex-col bg-slate-50">
     <AppHeader />
 
-    <main class="flex-1 flex items-center justify-center px-4 py-16">
-      <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-8">
-        <h1 class="text-2xl font-bold text-brand-dark mb-1">Iniciar sesión</h1>
-        <p class="text-sm text-slate-500 mb-6">
+    <main class="flex-1 flex items-center justify-center px-4 py-8 sm:py-16">
+      <div class="w-full max-w-md bg-white rounded-2xl shadow-sm p-5 sm:p-8">
+        <h1 class="text-xl sm:text-2xl font-bold text-brand-dark mb-1">Iniciar sesión</h1>
+        <p class="text-sm text-slate-500 mb-5 sm:mb-6">
           Accede para gestionar los recursos de TuringInsights.
         </p>
 
@@ -47,14 +47,14 @@ async function onSubmit() {
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Correo</label>
             <div class="flex items-center border border-slate-300 rounded-lg px-3 focus-within:ring-2 focus-within:ring-brand-teal">
-              <IconMail :size="18" class="text-slate-400" />
+              <IconMail :size="18" class="text-slate-400 shrink-0" />
               <input
                 v-model="email"
                 type="email"
                 required
                 autocomplete="email"
                 placeholder="admin@turing-ia.com"
-                class="flex-1 px-2 py-2.5 bg-transparent focus:outline-none"
+                class="flex-1 min-w-0 px-2 py-2.5 bg-transparent focus:outline-none"
               />
             </div>
           </div>
@@ -62,20 +62,20 @@ async function onSubmit() {
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
             <div class="flex items-center border border-slate-300 rounded-lg px-3 focus-within:ring-2 focus-within:ring-brand-teal">
-              <IconLock :size="18" class="text-slate-400" />
+              <IconLock :size="18" class="text-slate-400 shrink-0" />
               <input
                 v-model="password"
                 type="password"
                 required
                 autocomplete="current-password"
                 placeholder="••••••••"
-                class="flex-1 px-2 py-2.5 bg-transparent focus:outline-none"
+                class="flex-1 min-w-0 px-2 py-2.5 bg-transparent focus:outline-none"
               />
             </div>
           </div>
 
           <div v-if="error" class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            <IconAlertCircle :size="16" />
+            <IconAlertCircle :size="16" class="shrink-0" />
             {{ error }}
           </div>
 
@@ -88,7 +88,7 @@ async function onSubmit() {
           </button>
         </form>
 
-        <div class="mt-6 text-xs text-slate-500 border-t border-slate-200 pt-4">
+        <div class="mt-5 sm:mt-6 text-xs text-slate-500 border-t border-slate-200 pt-4 break-words">
           <p class="font-medium text-slate-600 mb-1">Credenciales de prueba</p>
           <p>Admin: admin@turing-ia.com / password</p>
           <p>User: user@turing-ia.com / password</p>

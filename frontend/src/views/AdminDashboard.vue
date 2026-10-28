@@ -181,18 +181,18 @@ onMounted(async () => {
   <div class="min-h-screen flex flex-col bg-slate-50">
     <AppHeader />
 
-    <main class="flex-1 max-w-6xl mx-auto px-4 py-10 w-full">
+    <main class="flex-1 max-w-6xl mx-auto px-4 py-6 sm:py-10 w-full">
       <RouterLink
         to="/"
-        class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition mb-6"
+        class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition mb-4 sm:mb-6"
       >
         <IconArrowLeft :size="18" />
         Volver al catálogo
       </RouterLink>
 
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-brand-dark mb-1">Dashboard</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-brand-dark mb-1">Dashboard</h1>
           <p class="text-sm text-slate-500">
             Gestiona los recursos publicados en TuringInsights.
           </p>
@@ -207,13 +207,13 @@ onMounted(async () => {
         </button>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex items-center gap-3">
-        <IconSearch :size="18" class="text-slate-400" />
+      <div class="bg-white rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 flex items-center gap-3">
+        <IconSearch :size="18" class="text-slate-400 shrink-0" />
         <input
           v-model="search"
           type="text"
           placeholder="Buscar por título o extracto..."
-          class="flex-1 border-0 focus:outline-none bg-transparent"
+          class="flex-1 min-w-0 border-0 focus:outline-none bg-transparent"
         />
         <span class="text-xs text-slate-500 whitespace-nowrap">
           {{ filtered.length }} de {{ resources.length }}
@@ -237,40 +237,44 @@ onMounted(async () => {
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 text-slate-600 text-left">
               <tr>
-                <th class="px-4 py-3 font-semibold">Título</th>
-                <th class="px-4 py-3 font-semibold">Tema</th>
-                <th class="px-4 py-3 font-semibold">Autor</th>
-                <th class="px-4 py-3 font-semibold">Publicado</th>
-                <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+                <th class="px-3 sm:px-4 py-3 font-semibold">Título</th>
+                <th class="px-4 py-3 font-semibold hidden sm:table-cell">Tema</th>
+                <th class="px-4 py-3 font-semibold hidden md:table-cell">Autor</th>
+                <th class="px-4 py-3 font-semibold hidden lg:table-cell">Publicado</th>
+                <th class="px-3 sm:px-4 py-3 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="r in filtered" :key="r.id" class="border-t border-slate-100 hover:bg-slate-50">
-                <td class="px-4 py-3">
+                <td class="px-3 sm:px-4 py-3 min-w-[10rem]">
                   <p class="font-medium text-brand-dark">{{ r.title }}</p>
                   <p class="text-xs text-slate-500 line-clamp-1">{{ r.excerpt }}</p>
+                  <p class="text-xs text-slate-400 mt-1 sm:hidden">{{ r.topic?.name }}</p>
+                  <p class="text-xs text-slate-400 mt-1 lg:hidden">{{ formatDate(r.published_at) }}</p>
                 </td>
-                <td class="px-4 py-3 text-slate-700">{{ r.topic?.name }}</td>
-                <td class="px-4 py-3 text-slate-700">{{ r.author?.name }}</td>
-                <td class="px-4 py-3 text-slate-500 whitespace-nowrap">{{ formatDate(r.published_at) }}</td>
-                <td class="px-4 py-3 text-right whitespace-nowrap">
+                <td class="px-4 py-3 text-slate-700 hidden sm:table-cell">{{ r.topic?.name }}</td>
+                <td class="px-4 py-3 text-slate-700 hidden md:table-cell">{{ r.author?.name }}</td>
+                <td class="px-4 py-3 text-slate-500 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.published_at) }}</td>
+                <td class="px-2 sm:px-4 py-3 text-right whitespace-nowrap">
                   <button
                     type="button"
                     @click="openEdit(r)"
-                    class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark px-2 py-1 rounded transition"
+                    class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark p-2 sm:px-2 sm:py-1 rounded transition"
                     title="Editar"
+                    aria-label="Editar"
                   >
-                    <IconEdit :size="16" />
-                    Editar
+                    <IconEdit :size="18" />
+                    <span class="hidden sm:inline">Editar</span>
                   </button>
                   <button
                     type="button"
                     @click="confirmDelete(r)"
-                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 px-2 py-1 rounded transition ml-1"
+                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 p-2 sm:px-2 sm:py-1 rounded transition sm:ml-1"
                     title="Eliminar"
+                    aria-label="Eliminar"
                   >
-                    <IconTrash :size="16" />
-                    Eliminar
+                    <IconTrash :size="18" />
+                    <span class="hidden sm:inline">Eliminar</span>
                   </button>
                 </td>
               </tr>
@@ -284,20 +288,20 @@ onMounted(async () => {
 
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-40"
       @click.self="closeModal"
     >
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 sticky top-0 bg-white z-10">
           <h2 class="text-lg font-bold text-brand-dark">
             {{ editing ? 'Editar recurso' : 'Nuevo recurso' }}
           </h2>
-          <button type="button" @click="closeModal" class="text-slate-500 hover:text-slate-800">
+          <button type="button" @click="closeModal" class="text-slate-500 hover:text-slate-800 p-1" aria-label="Cerrar">
             <IconX :size="20" />
           </button>
         </div>
 
-        <form @submit.prevent="save" class="p-6 space-y-4">
+        <form @submit.prevent="save" class="p-4 sm:p-6 space-y-4">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
             <input
@@ -329,7 +333,7 @@ onMounted(async () => {
             <p v-if="formErrors.content" class="text-xs text-red-600 mt-1">{{ formErrors.content[0] }}</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1">Tema</label>
               <select
@@ -347,7 +351,7 @@ onMounted(async () => {
               <input
                 v-model="form.published_at"
                 type="datetime-local"
-                class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                class="w-full min-w-0 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
               />
               <p v-if="formErrors.published_at" class="text-xs text-red-600 mt-1">{{ formErrors.published_at[0] }}</p>
             </div>
@@ -363,7 +367,7 @@ onMounted(async () => {
             <p v-if="formErrors.cover_url" class="text-xs text-red-600 mt-1">{{ formErrors.cover_url[0] }}</p>
           </div>
 
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+          <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-200">
             <button
               type="button"
               @click="closeModal"
@@ -374,7 +378,7 @@ onMounted(async () => {
             <button
               type="submit"
               :disabled="saving"
-              class="inline-flex items-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-5 py-2 rounded-lg transition disabled:opacity-50"
+              class="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-5 py-2 rounded-lg transition disabled:opacity-50"
             >
               <IconCheck :size="18" />
               {{ saving ? 'Guardando...' : 'Guardar' }}
@@ -389,15 +393,15 @@ onMounted(async () => {
       class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
       @click.self="cancelDelete"
     >
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 text-center">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm max-h-[95vh] overflow-y-auto p-5 sm:p-6 text-center">
         <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 text-red-600 rounded-full mb-4">
           <IconAlertTriangle :size="24" />
         </div>
         <h3 class="text-lg font-bold text-brand-dark mb-2">Eliminar recurso</h3>
-        <p class="text-sm text-slate-600 mb-6">
+        <p class="text-sm text-slate-600 mb-6 break-words">
           ¿Seguro que deseas eliminar <strong>{{ deleting?.title }}</strong>? Esta acción no se puede deshacer.
         </p>
-        <div class="flex justify-center gap-3">
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-center gap-3">
           <button
             type="button"
             @click="cancelDelete"
@@ -409,7 +413,7 @@ onMounted(async () => {
             type="button"
             @click="doDelete"
             :disabled="deletingBusy"
-            class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
+            class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
           >
             <IconTrash :size="18" />
             {{ deletingBusy ? 'Eliminando...' : 'Eliminar' }}
@@ -420,7 +424,7 @@ onMounted(async () => {
 
     <div
       v-if="toast"
-      class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium"
+      class="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-center sm:text-left"
       :class="toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-brand-dark text-slate-100'"
     >
       {{ toast.message }}

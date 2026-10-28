@@ -39,10 +39,10 @@ onMounted(async () => {
   <div class="min-h-screen flex flex-col bg-slate-50">
     <AppHeader />
 
-    <main class="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
+    <main class="flex-1 max-w-4xl mx-auto px-4 py-8 sm:py-12 w-full">
       <RouterLink
         to="/"
-        class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition mb-8"
+        class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition mb-6 sm:mb-8"
       >
         <IconArrowLeft :size="18" />
         Volver al catálogo
@@ -62,23 +62,23 @@ onMounted(async () => {
         </RouterLink>
       </div>
 
-      <article v-else-if="resource">
+      <article v-else-if="resource" class="min-w-0">
         <img
           v-if="resource.cover_url"
           :src="resource.cover_url"
           :alt="resource.title"
-          class="w-full h-72 object-cover rounded-xl mb-8"
+          class="w-full h-44 sm:h-60 md:h-72 object-cover rounded-xl mb-6 sm:mb-8"
         />
 
-        <span class="inline-block text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2 py-1 rounded mb-4">
+        <span class="inline-block text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2 py-1 rounded mb-3 sm:mb-4">
           {{ resource.topic?.name }}
         </span>
 
-        <h1 class="text-3xl md:text-4xl font-bold text-brand-dark mb-4">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-brand-dark mb-4 break-words">
           {{ resource.title }}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-500 mb-8 pb-8 border-b border-slate-200">
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-slate-200">
           <span class="inline-flex items-center gap-1.5">
             <IconUser :size="16" />
             {{ resource.author?.name }}
@@ -89,11 +89,11 @@ onMounted(async () => {
           </span>
         </div>
 
-        <p class="text-lg text-slate-700 mb-6 font-medium">
+        <p class="text-base sm:text-lg text-slate-700 mb-6 font-medium break-words">
           {{ resource.excerpt }}
         </p>
 
-        <div class="prose prose-slate max-w-none whitespace-pre-line text-slate-700 leading-relaxed">
+        <div class="prose prose-slate max-w-none whitespace-pre-line break-words text-slate-700 leading-relaxed">
           {{ resource.content }}
         </div>
       </article>

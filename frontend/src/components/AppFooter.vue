@@ -4,7 +4,7 @@ import { IconBrandGithub, IconBrain } from '@tabler/icons-vue'
 
 <template>
   <footer class="bg-brand-dark text-slate-300">
-    <div class="max-w-6xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-8 justify-between">
+    <div class="max-w-6xl mx-auto px-4 py-8 sm:py-10 flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
       <div class="max-w-sm">
         <div class="flex items-center gap-2 text-slate-100 font-bold text-lg mb-2">
           <IconBrain :size="22" />
@@ -15,7 +15,7 @@ import { IconBrandGithub, IconBrain } from '@tabler/icons-vue'
         </p>
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-6 text-sm">
+      <div class="flex flex-row flex-wrap gap-x-6 gap-y-3 text-sm">
         <a href="#" class="hover:text-brand-teal transition">Acerca de</a>
         <a href="#" class="hover:text-brand-teal transition">Contacto</a>
         <a href="#recursos" class="hover:text-brand-teal transition">Recursos</a>

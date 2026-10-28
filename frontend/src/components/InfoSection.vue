@@ -4,7 +4,7 @@ import { IconBook, IconSearch, IconTool } from '@tabler/icons-vue'
 
 <template>
   <section class="bg-white border-t border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+    <div class="max-w-6xl mx-auto px-4 py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 lg:gap-8 text-center">
       <div>
         <div class="mb-3 flex justify-center">
           <IconBook :size="40" />

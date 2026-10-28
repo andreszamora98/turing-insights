@@ -88,12 +88,12 @@ onMounted(() => fetchResources({ reset: true }))
     <AppHero />
 
     <main class="flex-1">
-      <section class="max-w-6xl mx-auto px-4 py-12">
-        <h2 class="text-2xl font-bold text-brand-dark mb-6">Explora por tema</h2>
+      <section class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
+        <h2 class="text-xl sm:text-2xl font-bold text-brand-dark mb-4 sm:mb-6">Explora por tema</h2>
         <TopicCards :topics="topics" :active="filters.topic" @select="selectTopic" />
       </section>
 
-      <section id="recursos" class="max-w-6xl mx-auto px-4 pb-8">
+      <section id="recursos" class="max-w-6xl mx-auto px-4 pb-6 sm:pb-8 scroll-mt-4">
         <FilterBar
           :filters="filters"
           :topics="topics"
@@ -104,8 +104,8 @@ onMounted(() => fetchResources({ reset: true }))
         />
       </section>
 
-      <section class="max-w-6xl mx-auto px-4 pb-16">
-        <h2 class="text-2xl font-bold text-brand-dark mb-6">Recursos recientes</h2>
+      <section class="max-w-6xl mx-auto px-4 pb-10 sm:pb-16">
+        <h2 class="text-xl sm:text-2xl font-bold text-brand-dark mb-4 sm:mb-6">Recursos recientes</h2>
 
         <div v-if="loading && resources.length === 0" class="text-center py-12 text-slate-500">
           Cargando recursos...
@@ -119,16 +119,16 @@ onMounted(() => fetchResources({ reset: true }))
           No se encontraron recursos con esos filtros.
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           <ResourceCard v-for="r in resources" :key="r.id" :resource="r" />
         </div>
 
-        <div v-if="hasMore" class="mt-10 text-center">
+        <div v-if="hasMore" class="mt-8 sm:mt-10 text-center">
           <button
             type="button"
             @click="loadMore"
             :disabled="loading"
-            class="bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-6 py-3 rounded-lg transition disabled:opacity-50"
+            class="w-full sm:w-auto bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-6 py-3 rounded-lg transition disabled:opacity-50"
           >
             {{ loading ? 'Cargando...' : 'Cargar más recursos' }}
           </button>
