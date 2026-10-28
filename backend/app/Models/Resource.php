@@ -41,9 +41,8 @@ class Resource extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    public function scopePublished(Builder $query): Builder
+    public function scopePublished($query)
     {
-        return $query->whereNotNull('published_at')
-                     ->where('published_at', '<=', now());
+        return $query->whereNotNull('published_at');
     }
 }
