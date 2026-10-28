@@ -426,6 +426,183 @@
           }
         }
       ]
+    },
+    {
+      "name": "04 · Contacto",
+      "item": [
+        {
+          "name": "Contact / Send message · 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test('Devuelve id del mensaje', function () {",
+                  "    pm.expect(res.data.id).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Andrea Prueba\",\n  \"email\": \"andrea@example.com\",\n  \"subject\": \"consulta\",\n  \"message\": \"Mensaje de prueba enviado desde Postman al endpoint de contacto.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          }
+        },
+        {
+          "name": "Contact / Proponer contenido · 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Carlos Prueba\",\n  \"email\": \"carlos@example.com\",\n  \"subject\": \"contenido\",\n  \"message\": \"Me gustaría proponer un recurso sobre optimización de consultas en MySQL.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          }
+        },
+        {
+          "name": "Contact / Campos vacíos · 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test('Errores en name, email, subject y message', function () {",
+                  "    pm.expect(res.errors).to.have.all.keys('name', 'email', 'subject', 'message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          }
+        },
+        {
+          "name": "Contact / Email y asunto inválidos · 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 422', function () {",
+                  "    pm.response.to.have.status(422);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test('Errores en email, subject y message', function () {",
+                  "    pm.expect(res.errors).to.have.all.keys('email', 'subject', 'message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Andrea Prueba\",\n  \"email\": \"correo-invalido\",\n  \"subject\": \"inexistente\",\n  \"message\": \"corto\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          }
+        },
+        {
+          "name": "Contact / Throttle · 429 (ejecutar 6 veces seguidas)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 201 o 429', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([201, 429]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Prueba Throttle\",\n  \"email\": \"throttle@example.com\",\n  \"subject\": \"otro\",\n  \"message\": \"Mensaje para comprobar el límite de cinco envíos por minuto.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/contact",
+              "host": ["{{base_url}}"],
+              "path": ["contact"]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

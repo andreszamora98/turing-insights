@@ -3,15 +3,20 @@ import { ref, computed } from 'vue'
 import {
   IconMail, IconBrandGithub, IconUser, IconSend, IconCheck, IconAlertCircle,
 } from '@tabler/icons-vue'
+import api from '../services/api'
 import AppHeader from '../components/AppHeader.vue'
 import AppFooter from '../components/AppFooter.vue'
 
 const contactEmail = 'contacto@turing-ia.com'
-const githubUrl = 'https://github.com/andreszamora98/turing-insights'
+const githubUrl = 'https://github.com/tu-usuario/turing-insights'
 
-const form = ref({ name: '', email: '', subject: 'consulta', message: '' })
+const emptyForm = () => ({ name: '', email: '', subject: 'consulta', message: '' })
+
+const form = ref(emptyForm())
 const errors = ref({})
 const sent = ref(false)
+const sending = ref(false)
+const serverError = ref(null)
 
 const subjects = [
   { value: 'consulta', label: 'Consulta general' },
@@ -21,6 +26,7 @@ const subjects = [
 ]
 
 const messageLength = computed(() => form.value.message.length)
+const hasErrors = computed(() => Object.keys(errors.value).length > 0)
 
 function validate() {
   const e = {}
@@ -31,18 +37,42 @@ function validate() {
   return Object.keys(e).length === 0
 }
 
-function onSubmit() {
+function mapServerErrors(serverErrors) {
+  const mapped = {}
+  Object.keys(serverErrors).forEach((key) => {
+    mapped[key] = serverErrors[key][0]
+  })
+  return mapped
+}
+
+async function onSubmit() {
   sent.value = false
+  serverError.value = null
   if (!validate()) return
 
-  const subjectLabel = subjects.find((s) => s.value === form.value.subject)?.label || 'Contacto'
-  const subject = encodeURIComponent(`[TuringInsights] ${subjectLabel}`)
-  const body = encodeURIComponent(
-    `Nombre: ${form.value.name}\nCorreo: ${form.value.email}\n\n${form.value.message}`
-  )
-
-  window.location.href = `mailto:${contactEmail}?subject=${subject}&body=${body}`
-  sent.value = true
+  sending.value = true
+  try {
+    await api.post('/contact', {
+      name: form.value.name.trim(),
+      email: form.value.email.trim(),
+      subject: form.value.subject,
+      message: form.value.message.trim(),
+    })
+    sent.value = true
+    errors.value = {}
+    form.value = emptyForm()
+  } catch (e) {
+    const status = e.response?.status
+    if (status === 422) {
+      errors.value = mapServerErrors(e.response.data.errors || {})
+    } else if (status === 429) {
+      serverError.value = 'Has enviado demasiados mensajes. Inténtalo de nuevo en un minuto.'
+    } else {
+      serverError.value = e.response?.data?.message || 'No se pudo enviar el mensaje. Inténtalo más tarde.'
+    }
+  } finally {
+    sending.value = false
+  }
 }
 </script>
 
@@ -102,6 +132,7 @@ function onSubmit() {
                     v-model="form.name"
                     type="text"
                     autocomplete="name"
+                    maxlength="100"
                     class="flex-1 min-w-0 px-2 py-2.5 bg-transparent focus:outline-none"
                   />
                 </div>
@@ -118,6 +149,7 @@ function onSubmit() {
                     v-model="form.email"
                     type="email"
                     autocomplete="email"
+                    maxlength="150"
                     class="flex-1 min-w-0 px-2 py-2.5 bg-transparent focus:outline-none"
                   />
                 </div>
@@ -135,6 +167,9 @@ function onSubmit() {
               >
                 <option v-for="s in subjects" :key="s.value" :value="s.value">{{ s.label }}</option>
               </select>
+              <Transition name="field">
+                <p v-if="errors.subject" class="text-xs text-red-600 mt-1">{{ errors.subject }}</p>
+              </Transition>
             </div>
 
             <div>
@@ -159,13 +194,13 @@ function onSubmit() {
                 class="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2"
               >
                 <IconCheck :size="16" class="shrink-0" />
-                Se abrió tu cliente de correo con el mensaje listo para enviar.
+                Mensaje enviado correctamente. Gracias por escribirnos.
               </div>
             </Transition>
 
             <Transition name="field">
               <div
-                v-if="Object.keys(errors).length > 0"
+                v-if="hasErrors"
                 class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
               >
                 <IconAlertCircle :size="16" class="shrink-0" />
@@ -173,13 +208,32 @@ function onSubmit() {
               </div>
             </Transition>
 
+            <Transition name="field">
+              <div
+                v-if="serverError"
+                class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+              >
+                <IconAlertCircle :size="16" class="shrink-0" />
+                {{ serverError }}
+              </div>
+            </Transition>
+
             <div class="flex justify-end pt-2">
               <button
                 type="submit"
-                class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-6 py-2.5 rounded-lg hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200"
+                :disabled="sending"
+                class="group w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-6 py-2.5 rounded-lg hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
-                <IconSend :size="18" class="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                Enviar mensaje
+                <span
+                  v-if="sending"
+                  class="h-4 w-4 rounded-full border-2 border-brand-dark/30 border-t-brand-dark animate-spin"
+                ></span>
+                <IconSend
+                  v-else
+                  :size="18"
+                  class="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+                {{ sending ? 'Enviando...' : 'Enviar mensaje' }}
               </button>
             </div>
           </form>

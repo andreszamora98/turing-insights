@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\TopicController;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,8 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/resources', [ResourceController::class, 'index']);
 Route::get('/resources/{slug}', [ResourceController::class, 'show']);
 Route::get('/topics', [TopicController::class, 'index']);
+
+Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:5,1');
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
