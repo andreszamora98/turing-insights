@@ -2,7 +2,7 @@
   "info": {
     "name": "turing-insights",
     "_postman_id": "a1b2c3d4-0000-4000-8000-000000000001",
-    "description": "Colección de pruebas para TuringInsights (Laravel + Vue). API base: {{base_url}}. Ejecutar Login admin antes de los requests de admin; Login user antes de Create as user.",
+    "description": "Colección de pruebas para TuringInsights (Laravel + Vue). API base: {{base_url}}. Ejecutar Login admin antes de los requests de admin y del detalle de recurso; Login user antes de Create as user.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -113,30 +113,6 @@
           }
         },
         {
-          "name": "Resources / Show by slug",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": {
-              "raw": "{{base_url}}/resources/{{resource_slug}}",
-              "host": ["{{base_url}}"],
-              "path": ["resources", "{{resource_slug}}"]
-            }
-          }
-        },
-        {
-          "name": "Resources / Show · not found (404)",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": {
-              "raw": "{{base_url}}/resources/no-existe",
-              "host": ["{{base_url}}"],
-              "path": ["resources", "no-existe"]
-            }
-          }
-        },
-        {
           "name": "Topics / List all",
           "request": {
             "method": "GET",
@@ -243,6 +219,48 @@
               "raw": "{{base_url}}/me",
               "host": ["{{base_url}}"],
               "path": ["me"]
+            }
+          }
+        },
+        {
+          "name": "Show by slug (auth) · 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/resources/{{resource_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["resources", "{{resource_slug}}"]
+            }
+          }
+        },
+        {
+          "name": "Show · not found (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/resources/no-existe",
+              "host": ["{{base_url}}"],
+              "path": ["resources", "no-existe"]
+            }
+          }
+        },
+        {
+          "name": "Show · sin token (401)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/resources/{{resource_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["resources", "{{resource_slug}}"]
             }
           }
         },
