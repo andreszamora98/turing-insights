@@ -5,9 +5,9 @@ import { IconBrandGithub, IconBrain } from '@tabler/icons-vue'
 <template>
   <footer class="bg-brand-dark text-slate-300">
     <div class="max-w-6xl mx-auto px-4 py-8 sm:py-10 flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
-      <div class="max-w-sm">
+      <div class="group max-w-sm">
         <div class="flex items-center gap-2 text-slate-100 font-bold text-lg mb-2">
-          <IconBrain :size="22" />
+          <IconBrain :size="22" class="transition-transform duration-500 group-hover:rotate-12" />
           <span>TuringInsights</span>
         </div>
         <p class="text-sm">
@@ -16,14 +16,14 @@ import { IconBrandGithub, IconBrain } from '@tabler/icons-vue'
       </div>
 
       <div class="flex flex-row flex-wrap gap-x-6 gap-y-3 text-sm">
-        <a href="#" class="hover:text-brand-teal transition">Acerca de</a>
-        <a href="#" class="hover:text-brand-teal transition">Contacto</a>
-        <a href="#recursos" class="hover:text-brand-teal transition">Recursos</a>
+        <a href="#" class="inline-block hover:text-brand-teal hover:-translate-y-0.5 transition duration-200">Acerca de</a>
+        <a href="#" class="inline-block hover:text-brand-teal hover:-translate-y-0.5 transition duration-200">Contacto</a>
+        <a href="#recursos" class="inline-block hover:text-brand-teal hover:-translate-y-0.5 transition duration-200">Recursos</a>
         <a
-          href="https://github.com/tu-usuario/turing-insights"
+          href="https://github.com/andreszamora98/turing-insights"
           target="_blank"
           rel="noopener"
-          class="flex items-center gap-1.5 hover:text-brand-teal transition"
+          class="flex items-center gap-1.5 hover:text-brand-teal hover:-translate-y-0.5 transition duration-200"
         >
           <IconBrandGithub :size="16" />
           <span>GitHub</span>

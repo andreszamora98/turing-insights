@@ -24,6 +24,8 @@ const showConfirm = ref(false)
 const deleting = ref(null)
 const deletingBusy = ref(false)
 
+let toastTimer = null
+
 const filtered = computed(() => {
   if (!search.value) return resources.value
   const q = search.value.toLowerCase()
@@ -49,7 +51,8 @@ function formatDate(iso) {
 
 function showToast(message, type = 'success') {
   toast.value = { message, type }
-  setTimeout(() => { toast.value = null }, 3500)
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toast.value = null }, 3500)
 }
 
 async function loadResources() {
@@ -184,13 +187,17 @@ onMounted(async () => {
     <main class="flex-1 max-w-6xl mx-auto px-4 py-6 sm:py-10 w-full">
       <RouterLink
         to="/"
-        class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition mb-4 sm:mb-6"
+        class="group rise inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-dark transition-colors duration-200 mb-4 sm:mb-6"
+        style="--i: 0"
       >
-        <IconArrowLeft :size="18" />
+        <IconArrowLeft :size="18" class="transition-transform duration-300 group-hover:-translate-x-1" />
         Volver al catálogo
       </RouterLink>
 
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8">
+      <div
+        class="rise flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6 sm:mb-8"
+        style="--i: 1"
+      >
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-brand-dark mb-1">Dashboard</h1>
           <p class="text-sm text-slate-500">
@@ -200,14 +207,17 @@ onMounted(async () => {
         <button
           type="button"
           @click="openCreate"
-          class="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-4 py-2.5 rounded-lg transition"
+          class="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-4 py-2.5 rounded-lg hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200"
         >
           <IconPlus :size="18" />
           Nuevo recurso
         </button>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-3 sm:p-4 mb-4 sm:mb-6 flex items-center gap-3">
+      <div
+        class="rise bg-white rounded-xl shadow-sm hover:shadow-md focus-within:shadow-md transition-shadow duration-300 p-3 sm:p-4 mb-4 sm:mb-6 flex items-center gap-3"
+        style="--i: 2"
+      >
         <IconSearch :size="18" class="text-slate-400 shrink-0" />
         <input
           v-model="search"
@@ -220,19 +230,29 @@ onMounted(async () => {
         </span>
       </div>
 
-      <div v-if="loading" class="text-center py-16 text-slate-500">
-        Cargando recursos...
+      <div
+        v-if="loading"
+        class="bg-white rounded-xl shadow-sm p-4 space-y-4 animate-pulse"
+        aria-busy="true"
+      >
+        <div v-for="n in 5" :key="n" class="flex items-center gap-4">
+          <div class="flex-1 space-y-2">
+            <div class="h-4 w-1/2 bg-slate-200 rounded"></div>
+            <div class="h-3 w-3/4 bg-slate-200 rounded"></div>
+          </div>
+          <div class="h-8 w-16 bg-slate-200 rounded"></div>
+        </div>
       </div>
 
-      <div v-else-if="error" class="text-center py-16 text-red-600">
+      <div v-else-if="error" class="fade-in text-center py-16 text-red-600">
         Error: {{ error }}
       </div>
 
-      <div v-else-if="filtered.length === 0" class="text-center py-16 text-slate-500 bg-white rounded-xl">
+      <div v-else-if="filtered.length === 0" class="fade-in text-center py-16 text-slate-500 bg-white rounded-xl">
         No hay recursos que coincidan con la búsqueda.
       </div>
 
-      <div v-else class="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div v-else class="fade-in bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead class="bg-slate-100 text-slate-600 text-left">
@@ -244,8 +264,13 @@ onMounted(async () => {
                 <th class="px-3 sm:px-4 py-3 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-for="r in filtered" :key="r.id" class="border-t border-slate-100 hover:bg-slate-50">
+            <TransitionGroup tag="tbody" name="row" appear>
+              <tr
+                v-for="(r, i) in filtered"
+                :key="r.id"
+                :style="{ '--i': Math.min(i, 10) }"
+                class="border-t border-slate-100 hover:bg-slate-50 transition-colors duration-200"
+              >
                 <td class="px-3 sm:px-4 py-3 min-w-[10rem]">
                   <p class="font-medium text-brand-dark">{{ r.title }}</p>
                   <p class="text-xs text-slate-500 line-clamp-1">{{ r.excerpt }}</p>
@@ -259,7 +284,7 @@ onMounted(async () => {
                   <button
                     type="button"
                     @click="openEdit(r)"
-                    class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark p-2 sm:px-2 sm:py-1 rounded transition"
+                    class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark hover:bg-brand-teal/10 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200"
                     title="Editar"
                     aria-label="Editar"
                   >
@@ -269,7 +294,7 @@ onMounted(async () => {
                   <button
                     type="button"
                     @click="confirmDelete(r)"
-                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 p-2 sm:px-2 sm:py-1 rounded transition sm:ml-1"
+                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 hover:bg-red-50 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200 sm:ml-1"
                     title="Eliminar"
                     aria-label="Eliminar"
                   >
@@ -278,7 +303,7 @@ onMounted(async () => {
                   </button>
                 </td>
               </tr>
-            </tbody>
+            </TransitionGroup>
           </table>
         </div>
       </div>
@@ -286,148 +311,246 @@ onMounted(async () => {
 
     <AppFooter />
 
-    <div
-      v-if="showModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-40"
-      @click.self="closeModal"
-    >
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 sticky top-0 bg-white z-10">
-          <h2 class="text-lg font-bold text-brand-dark">
-            {{ editing ? 'Editar recurso' : 'Nuevo recurso' }}
-          </h2>
-          <button type="button" @click="closeModal" class="text-slate-500 hover:text-slate-800 p-1" aria-label="Cerrar">
-            <IconX :size="20" />
-          </button>
-        </div>
-
-        <form @submit.prevent="save" class="p-4 sm:p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
-            <input
-              v-model="form.title"
-              type="text"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-            />
-            <p v-if="formErrors.title" class="text-xs text-red-600 mt-1">{{ formErrors.title[0] }}</p>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Extracto</label>
-            <textarea
-              v-model="form.excerpt"
-              rows="2"
-              maxlength="500"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-            ></textarea>
-            <p v-if="formErrors.excerpt" class="text-xs text-red-600 mt-1">{{ formErrors.excerpt[0] }}</p>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Contenido</label>
-            <textarea
-              v-model="form.content"
-              rows="6"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-            ></textarea>
-            <p v-if="formErrors.content" class="text-xs text-red-600 mt-1">{{ formErrors.content[0] }}</p>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Tema</label>
-              <select
-                v-model="form.topic_id"
-                class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-              >
-                <option disabled value="">Selecciona un tema</option>
-                <option v-for="t in topics" :key="t.id" :value="t.id">{{ t.name }}</option>
-              </select>
-              <p v-if="formErrors.topic_id" class="text-xs text-red-600 mt-1">{{ formErrors.topic_id[0] }}</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de publicación</label>
-              <input
-                v-model="form.published_at"
-                type="datetime-local"
-                class="w-full min-w-0 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-              />
-              <p v-if="formErrors.published_at" class="text-xs text-red-600 mt-1">{{ formErrors.published_at[0] }}</p>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">URL de portada</label>
-            <input
-              v-model="form.cover_url"
-              type="url"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal"
-            />
-            <p v-if="formErrors.cover_url" class="text-xs text-red-600 mt-1">{{ formErrors.cover_url[0] }}</p>
-          </div>
-
-          <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-200">
+    <Transition name="modal">
+      <div
+        v-if="showModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-40"
+        @click.self="closeModal"
+      >
+        <div class="modal-panel bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+          <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+            <h2 class="text-lg font-bold text-brand-dark">
+              {{ editing ? 'Editar recurso' : 'Nuevo recurso' }}
+            </h2>
             <button
               type="button"
               @click="closeModal"
-              class="px-4 py-2 text-slate-600 hover:text-brand-dark transition"
+              class="text-slate-500 hover:text-slate-800 hover:rotate-90 p-1 transition duration-200"
+              aria-label="Cerrar"
+            >
+              <IconX :size="20" />
+            </button>
+          </div>
+
+          <form @submit.prevent="save" class="p-4 sm:p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Título</label>
+              <input
+                v-model="form.title"
+                type="text"
+                class="w-full border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+              />
+              <p v-if="formErrors.title" class="text-xs text-red-600 mt-1">{{ formErrors.title[0] }}</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Extracto</label>
+              <textarea
+                v-model="form.excerpt"
+                rows="2"
+                maxlength="500"
+                class="w-full border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+              ></textarea>
+              <p v-if="formErrors.excerpt" class="text-xs text-red-600 mt-1">{{ formErrors.excerpt[0] }}</p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Contenido</label>
+              <textarea
+                v-model="form.content"
+                rows="6"
+                class="w-full border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+              ></textarea>
+              <p v-if="formErrors.content" class="text-xs text-red-600 mt-1">{{ formErrors.content[0] }}</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Tema</label>
+                <select
+                  v-model="form.topic_id"
+                  class="w-full border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+                >
+                  <option disabled value="">Selecciona un tema</option>
+                  <option v-for="t in topics" :key="t.id" :value="t.id">{{ t.name }}</option>
+                </select>
+                <p v-if="formErrors.topic_id" class="text-xs text-red-600 mt-1">{{ formErrors.topic_id[0] }}</p>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Fecha de publicación</label>
+                <input
+                  v-model="form.published_at"
+                  type="datetime-local"
+                  class="w-full min-w-0 border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+                />
+                <p v-if="formErrors.published_at" class="text-xs text-red-600 mt-1">{{ formErrors.published_at[0] }}</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1">URL de portada</label>
+              <input
+                v-model="form.cover_url"
+                type="url"
+                class="w-full border border-slate-300 hover:border-slate-400 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-teal transition duration-200"
+              />
+              <p v-if="formErrors.cover_url" class="text-xs text-red-600 mt-1">{{ formErrors.cover_url[0] }}</p>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-200">
+              <button
+                type="button"
+                @click="closeModal"
+                class="px-4 py-2 text-slate-600 hover:text-brand-dark transition-colors duration-200"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                :disabled="saving"
+                class="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-5 py-2 rounded-lg hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:shadow-none"
+              >
+                <span
+                  v-if="saving"
+                  class="h-4 w-4 rounded-full border-2 border-brand-dark/30 border-t-brand-dark animate-spin"
+                ></span>
+                <IconCheck v-else :size="18" />
+                {{ saving ? 'Guardando...' : 'Guardar' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="modal">
+      <div
+        v-if="showConfirm"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        @click.self="cancelDelete"
+      >
+        <div class="modal-panel bg-white rounded-xl shadow-xl w-full max-w-sm max-h-[95vh] overflow-y-auto p-5 sm:p-6 text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 text-red-600 rounded-full mb-4">
+            <IconAlertTriangle :size="24" />
+          </div>
+          <h3 class="text-lg font-bold text-brand-dark mb-2">Eliminar recurso</h3>
+          <p class="text-sm text-slate-600 mb-6 break-words">
+            ¿Seguro que deseas eliminar <strong>{{ deleting?.title }}</strong>? Esta acción no se puede deshacer.
+          </p>
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-center gap-3">
+            <button
+              type="button"
+              @click="cancelDelete"
+              class="px-4 py-2 text-slate-600 hover:text-brand-dark transition-colors duration-200"
             >
               Cancelar
             </button>
             <button
-              type="submit"
-              :disabled="saving"
-              class="inline-flex items-center justify-center gap-2 bg-brand-teal hover:bg-brand-teal-light text-brand-dark font-semibold px-5 py-2 rounded-lg transition disabled:opacity-50"
+              type="button"
+              @click="doDelete"
+              :disabled="deletingBusy"
+              class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg hover:shadow-lg hover:shadow-red-600/20 active:scale-95 transition duration-200 disabled:opacity-50 disabled:hover:shadow-none"
             >
-              <IconCheck :size="18" />
-              {{ saving ? 'Guardando...' : 'Guardar' }}
+              <span
+                v-if="deletingBusy"
+                class="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin"
+              ></span>
+              <IconTrash v-else :size="18" />
+              {{ deletingBusy ? 'Eliminando...' : 'Eliminar' }}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
-
-    <div
-      v-if="showConfirm"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-      @click.self="cancelDelete"
-    >
-      <div class="bg-white rounded-xl shadow-xl w-full max-w-sm max-h-[95vh] overflow-y-auto p-5 sm:p-6 text-center">
-        <div class="inline-flex items-center justify-center w-12 h-12 bg-red-100 text-red-600 rounded-full mb-4">
-          <IconAlertTriangle :size="24" />
-        </div>
-        <h3 class="text-lg font-bold text-brand-dark mb-2">Eliminar recurso</h3>
-        <p class="text-sm text-slate-600 mb-6 break-words">
-          ¿Seguro que deseas eliminar <strong>{{ deleting?.title }}</strong>? Esta acción no se puede deshacer.
-        </p>
-        <div class="flex flex-col-reverse sm:flex-row sm:justify-center gap-3">
-          <button
-            type="button"
-            @click="cancelDelete"
-            class="px-4 py-2 text-slate-600 hover:text-brand-dark transition"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            @click="doDelete"
-            :disabled="deletingBusy"
-            class="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition disabled:opacity-50"
-          >
-            <IconTrash :size="18" />
-            {{ deletingBusy ? 'Eliminando...' : 'Eliminar' }}
-          </button>
         </div>
       </div>
-    </div>
+    </Transition>
 
-    <div
-      v-if="toast"
-      class="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-center sm:text-left"
-      :class="toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-brand-dark text-slate-100'"
-    >
-      {{ toast.message }}
-    </div>
+    <Transition name="toast">
+      <div
+        v-if="toast"
+        class="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-center sm:text-left"
+        :class="toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-brand-dark text-slate-100'"
+      >
+        {{ toast.message }}
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.rise {
+  animation: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+.fade-in {
+  animation: fade-in 0.4s ease both;
+}
+
+.row-enter-active {
+  transition: opacity 0.35s ease;
+  transition-delay: calc(var(--i, 0) * 30ms);
+}
+
+.row-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.row-enter-from,
+.row-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-active .modal-panel,
+.modal-leave-active .modal-panel {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+.modal-enter-from .modal-panel,
+.modal-leave-to .modal-panel {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+</style>

@@ -26,15 +26,33 @@ async function onLogout() {
 <template>
   <header class="bg-brand-dark text-slate-100 relative">
     <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-      <RouterLink to="/" class="flex items-center gap-2" @click="closeMenu">
-        <IconBrain :size="26" class="text-brand-teal" />
+      <RouterLink to="/" class="group flex items-center gap-2" @click="closeMenu">
+        <IconBrain
+          :size="26"
+          class="text-brand-teal transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110"
+        />
         <span class="font-bold text-lg">TuringInsights</span>
       </RouterLink>
 
       <nav class="hidden lg:flex items-center gap-6 text-sm">
-        <RouterLink to="/" class="hover:text-brand-teal transition">Inicio</RouterLink>
-        <a href="/#recursos" class="hover:text-brand-teal transition">Recursos</a>
-        <a href="/#temas" class="hover:text-brand-teal transition">Temas</a>
+        <RouterLink
+          to="/"
+          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+        >
+          Inicio
+        </RouterLink>
+        <a
+          href="/#recursos"
+          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+        >
+          Recursos
+        </a>
+        <a
+          href="/#temas"
+          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+        >
+          Temas
+        </a>
 
         <template v-if="isAuthenticated">
           <span class="inline-flex items-center gap-1.5 text-slate-300">
@@ -45,7 +63,7 @@ async function onLogout() {
           <RouterLink
             v-if="isAdmin"
             to="/admin"
-            class="inline-flex items-center gap-1.5 bg-brand-teal text-brand-dark font-semibold px-3 py-1.5 rounded-md hover:bg-brand-teal-light transition"
+            class="inline-flex items-center gap-1.5 bg-brand-teal text-brand-dark font-semibold px-3 py-1.5 rounded-md hover:bg-brand-teal-light hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200"
           >
             <IconLayoutDashboard :size="16" />
             Dashboard
@@ -54,7 +72,7 @@ async function onLogout() {
           <button
             type="button"
             @click="onLogout"
-            class="inline-flex items-center gap-1.5 text-slate-300 hover:text-brand-teal transition"
+            class="inline-flex items-center gap-1.5 text-slate-300 hover:text-brand-teal active:scale-95 transition duration-200"
           >
             <IconLogout :size="16" />
             Cerrar sesión
@@ -64,7 +82,7 @@ async function onLogout() {
         <RouterLink
           v-else
           to="/login"
-          class="bg-brand-teal text-brand-dark font-semibold px-3 py-1.5 rounded-md hover:bg-brand-teal-light transition"
+          class="bg-brand-teal text-brand-dark font-semibold px-3 py-1.5 rounded-md hover:bg-brand-teal-light hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200"
         >
           Iniciar sesión
         </RouterLink>
@@ -72,78 +90,136 @@ async function onLogout() {
 
       <button
         type="button"
-        class="lg:hidden p-2 -mr-2 rounded-md hover:bg-white/10 transition"
+        class="lg:hidden p-2 -mr-2 rounded-md hover:bg-white/10 active:scale-90 transition duration-200"
         :aria-expanded="menuOpen"
         :aria-label="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
         @click="menuOpen = !menuOpen"
       >
-        <IconX v-if="menuOpen" :size="24" />
-        <IconMenu2 v-else :size="24" />
+        <Transition name="icon" mode="out-in">
+          <IconX v-if="menuOpen" key="close" :size="24" />
+          <IconMenu2 v-else key="open" :size="24" />
+        </Transition>
       </button>
     </div>
 
-    <nav
-      v-if="menuOpen"
-      class="lg:hidden border-t border-white/10 max-h-[70vh] overflow-y-auto"
-    >
-      <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
-        <RouterLink
-          to="/"
-          class="px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-          @click="closeMenu"
-        >
-          Inicio
-        </RouterLink>
-        <a
-          href="/#recursos"
-          class="px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-          @click="closeMenu"
-        >
-          Recursos
-        </a>
-        <a
-          href="/#temas"
-          class="px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-          @click="closeMenu"
-        >
-          Temas
-        </a>
-
-        <template v-if="isAuthenticated">
-          <span class="inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 border-t border-white/10 mt-1">
-            <IconUser :size="16" />
-            {{ user?.name }}
-          </span>
-
+    <Transition name="menu">
+      <nav
+        v-if="menuOpen"
+        class="lg:hidden border-t border-white/10 max-h-[70vh] overflow-y-auto"
+      >
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
           <RouterLink
-            v-if="isAdmin"
-            to="/admin"
-            class="inline-flex items-center justify-center gap-1.5 bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light transition"
+            to="/"
+            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
+            style="--i: 0"
             @click="closeMenu"
           >
-            <IconLayoutDashboard :size="16" />
-            Dashboard
+            Inicio
           </RouterLink>
-
-          <button
-            type="button"
-            @click="onLogout"
-            class="inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 hover:text-brand-teal transition"
+          <a
+            href="/#recursos"
+            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
+            style="--i: 1"
+            @click="closeMenu"
           >
-            <IconLogout :size="16" />
-            Cerrar sesión
-          </button>
-        </template>
+            Recursos
+          </a>
+          <a
+            href="/#temas"
+            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
+            style="--i: 2"
+            @click="closeMenu"
+          >
+            Temas
+          </a>
 
-        <RouterLink
-          v-else
-          to="/login"
-          class="text-center bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light transition mt-1"
-          @click="closeMenu"
-        >
-          Iniciar sesión
-        </RouterLink>
-      </div>
-    </nav>
+          <template v-if="isAuthenticated">
+            <span
+              class="menu-item inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 border-t border-white/10 mt-1"
+              style="--i: 3"
+            >
+              <IconUser :size="16" />
+              {{ user?.name }}
+            </span>
+
+            <RouterLink
+              v-if="isAdmin"
+              to="/admin"
+              class="menu-item inline-flex items-center justify-center gap-1.5 bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light active:scale-95 transition"
+              style="--i: 4"
+              @click="closeMenu"
+            >
+              <IconLayoutDashboard :size="16" />
+              Dashboard
+            </RouterLink>
+
+            <button
+              type="button"
+              @click="onLogout"
+              class="menu-item inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 hover:text-brand-teal transition"
+              style="--i: 5"
+            >
+              <IconLogout :size="16" />
+              Cerrar sesión
+            </button>
+          </template>
+
+          <RouterLink
+            v-else
+            to="/login"
+            class="menu-item text-center bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light active:scale-95 transition mt-1"
+            style="--i: 3"
+            @click="closeMenu"
+          >
+            Iniciar sesión
+          </RouterLink>
+        </div>
+      </nav>
+    </Transition>
   </header>
 </template>
+
+<style scoped>
+.icon-enter-active,
+.icon-leave-active {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.icon-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.8);
+}
+
+.icon-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.8);
+}
+
+.menu-enter-active,
+.menu-leave-active {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+}
+
+.menu-enter-from,
+.menu-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+
+.menu-enter-to,
+.menu-leave-from {
+  max-height: 70vh;
+  opacity: 1;
+}
+
+.menu-enter-active .menu-item {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc(var(--i, 0) * 45ms + 60ms);
+}
+
+.menu-enter-from .menu-item {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+</style>

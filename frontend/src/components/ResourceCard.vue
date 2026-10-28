@@ -1,9 +1,13 @@
 <script setup>
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { IconArrowRight } from '@tabler/icons-vue'
+
 defineProps({
   resource: { type: Object, required: true },
 })
+
+const loaded = ref(false)
 
 function formatDate(value) {
   if (!value) return ''
@@ -15,13 +19,18 @@ function formatDate(value) {
 </script>
 
 <template>
-  <article class="bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
-    <img
-      :src="resource.cover_url || 'https://picsum.photos/seed/fallback/800/450'"
-      :alt="resource.title"
-      class="w-full h-48 object-cover"
-      loading="lazy"
-    />
+  <article class="group bg-white rounded-xl shadow-sm overflow-hidden flex flex-col transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <div class="h-48 overflow-hidden bg-slate-200" :class="{ 'animate-pulse': !loaded }">
+      <img
+        :src="resource.cover_url || 'https://picsum.photos/seed/fallback/800/450'"
+        :alt="resource.title"
+        class="w-full h-full object-cover transition duration-700 group-hover:scale-105"
+        :class="loaded ? 'opacity-100' : 'opacity-0'"
+        loading="lazy"
+        @load="loaded = true"
+        @error="loaded = true"
+      />
+    </div>
 
     <div class="p-5 flex flex-col flex-1">
       <span class="inline-block text-xs font-semibold text-brand-teal bg-brand-teal/10 px-2 py-1 rounded self-start mb-3">
@@ -42,10 +51,10 @@ function formatDate(value) {
 
       <RouterLink
         :to="{ name: 'resource-detail', params: { slug: resource.slug } }"
-        class="inline-flex items-center gap-1 text-brand-teal font-semibold text-sm hover:text-brand-dark transition"
-        >
+        class="inline-flex items-center gap-1 text-brand-teal font-semibold text-sm hover:text-brand-dark transition-colors duration-200"
+      >
         Leer recurso
-        <IconArrowRight :size="16" />
+        <IconArrowRight :size="16" class="transition-transform duration-300 group-hover:translate-x-1" />
       </RouterLink>
     </div>
   </article>
