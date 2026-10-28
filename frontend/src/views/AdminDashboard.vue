@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import {
   IconPlus, IconEdit, IconTrash, IconSearch, IconAlertTriangle, IconCheck, IconX, IconArrowLeft,
+  IconChevronLeft, IconChevronRight,
 } from '@tabler/icons-vue'
 import api from '../services/api'
 import AppHeader from '../components/AppHeader.vue'
@@ -14,6 +15,12 @@ const error = ref(null)
 const search = ref('')
 const toast = ref(null)
 
+const currentPage = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
+const perPage = 3
+const transitionKey = ref(0)
+
 const showModal = ref(false)
 const editing = ref(null)
 const form = ref({ title: '', excerpt: '', content: '', cover_url: '', topic_id: '', published_at: '' })
@@ -25,13 +32,20 @@ const deleting = ref(null)
 const deletingBusy = ref(false)
 
 let toastTimer = null
+let searchTimer = null
 
-const filtered = computed(() => {
-  if (!search.value) return resources.value
-  const q = search.value.toLowerCase()
-  return resources.value.filter(
-    (r) => r.title.toLowerCase().includes(q) || (r.excerpt || '').toLowerCase().includes(q)
-  )
+const pageNumbers = computed(() => {
+  const t = lastPage.value
+  const c = currentPage.value
+  if (t <= 7) return Array.from({ length: t }, (_, i) => i + 1)
+  const pages = [1]
+  if (c > 3) pages.push('…')
+  const start = Math.max(2, c - 1)
+  const end = Math.min(t - 1, c + 1)
+  for (let i = start; i <= end; i++) pages.push(i)
+  if (c < t - 2) pages.push('…')
+  pages.push(t)
+  return pages
 })
 
 function pad(n) {
@@ -55,17 +69,29 @@ function showToast(message, type = 'success') {
   toastTimer = setTimeout(() => { toast.value = null }, 3500)
 }
 
-async function loadResources() {
+async function loadResources({ page, animate = false } = {}) {
   loading.value = true
   error.value = null
   try {
-    const { data } = await api.get('/resources', { params: { per_page: 50, sort: 'recent' } })
+    const params = { per_page: perPage, page: page ?? currentPage.value }
+    if (search.value) params.search = search.value
+    const { data } = await api.get('/resources', { params })
     resources.value = data.data
+    lastPage.value = data.last_page
+    total.value = data.total
+    if (page) currentPage.value = page
+    if (animate) transitionKey.value++
   } catch (e) {
     error.value = e.response?.data?.message || e.message
   } finally {
     loading.value = false
   }
+}
+
+function goToPage(n) {
+  if (loading.value) return
+  if (n < 1 || n > lastPage.value || n === currentPage.value) return
+  loadResources({ page: n, animate: true })
 }
 
 async function loadTopics() {
@@ -168,6 +194,9 @@ async function doDelete() {
     showToast('Recurso eliminado')
     cancelDelete()
     await loadResources()
+    if (resources.value.length === 0 && currentPage.value > 1) {
+      await loadResources({ page: currentPage.value - 1, animate: true })
+    }
   } catch (e) {
     showToast(e.response?.data?.message || 'Error al eliminar', 'error')
   } finally {
@@ -175,8 +204,15 @@ async function doDelete() {
   }
 }
 
+watch(search, () => {
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    loadResources({ page: 1, animate: true })
+  }, 350)
+})
+
 onMounted(async () => {
-  await Promise.all([loadResources(), loadTopics()])
+  await Promise.all([loadResources({ page: 1 }), loadTopics()])
 })
 </script>
 
@@ -226,87 +262,154 @@ onMounted(async () => {
           class="flex-1 min-w-0 border-0 focus:outline-none bg-transparent"
         />
         <span class="text-xs text-slate-500 whitespace-nowrap">
-          {{ filtered.length }} de {{ resources.length }}
+          {{ resources.length }} de {{ total }}
         </span>
       </div>
 
-      <div
-        v-if="loading"
-        class="bg-white rounded-xl shadow-sm p-4 space-y-4 animate-pulse"
-        aria-busy="true"
-      >
-        <div v-for="n in 5" :key="n" class="flex items-center gap-4">
-          <div class="flex-1 space-y-2">
-            <div class="h-4 w-1/2 bg-slate-200 rounded"></div>
-            <div class="h-3 w-3/4 bg-slate-200 rounded"></div>
+      <div class="relative">
+        <Transition name="fade">
+          <div
+            v-if="loading && resources.length > 0"
+            class="absolute inset-x-0 top-0 h-1 bg-brand-teal/10 overflow-hidden rounded-t-xl z-20"
+          >
+            <div class="h-full w-1/3 bg-brand-teal progress-bar"></div>
           </div>
-          <div class="h-8 w-16 bg-slate-200 rounded"></div>
-        </div>
-      </div>
+        </Transition>
 
-      <div v-else-if="error" class="fade-in text-center py-16 text-red-600">
-        Error: {{ error }}
-      </div>
+        <Transition name="page-fade" mode="out-in">
+          <div
+            v-if="loading && resources.length === 0"
+            key="skeleton"
+            class="bg-white rounded-xl shadow-sm p-4 space-y-4 animate-pulse"
+            aria-busy="true"
+          >
+            <div v-for="n in 5" :key="n" class="flex items-center gap-4">
+              <div class="flex-1 space-y-2">
+                <div class="h-4 w-1/2 bg-slate-200 rounded"></div>
+                <div class="h-3 w-3/4 bg-slate-200 rounded"></div>
+              </div>
+              <div class="h-8 w-16 bg-slate-200 rounded"></div>
+            </div>
+          </div>
 
-      <div v-else-if="filtered.length === 0" class="fade-in text-center py-16 text-slate-500 bg-white rounded-xl">
-        No hay recursos que coincidan con la búsqueda.
-      </div>
+          <div v-else-if="error" key="error" class="text-center py-16 text-red-600">
+            Error: {{ error }}
+          </div>
 
-      <div v-else class="fade-in bg-white rounded-xl shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-100 text-slate-600 text-left">
-              <tr>
-                <th class="px-3 sm:px-4 py-3 font-semibold">Título</th>
-                <th class="px-4 py-3 font-semibold hidden sm:table-cell">Tema</th>
-                <th class="px-4 py-3 font-semibold hidden md:table-cell">Autor</th>
-                <th class="px-4 py-3 font-semibold hidden lg:table-cell">Publicado</th>
-                <th class="px-3 sm:px-4 py-3 font-semibold text-right">Acciones</th>
-              </tr>
-            </thead>
-            <TransitionGroup tag="tbody" name="row" appear>
-              <tr
-                v-for="(r, i) in filtered"
-                :key="r.id"
-                :style="{ '--i': Math.min(i, 10) }"
-                class="border-t border-slate-100 hover:bg-slate-50 transition-colors duration-200"
-              >
-                <td class="px-3 sm:px-4 py-3 min-w-[10rem]">
-                  <p class="font-medium text-brand-dark">{{ r.title }}</p>
-                  <p class="text-xs text-slate-500 line-clamp-1">{{ r.excerpt }}</p>
-                  <p class="text-xs text-slate-400 mt-1 sm:hidden">{{ r.topic?.name }}</p>
-                  <p class="text-xs text-slate-400 mt-1 lg:hidden">{{ formatDate(r.published_at) }}</p>
-                </td>
-                <td class="px-4 py-3 text-slate-700 hidden sm:table-cell">{{ r.topic?.name }}</td>
-                <td class="px-4 py-3 text-slate-700 hidden md:table-cell">{{ r.author?.name }}</td>
-                <td class="px-4 py-3 text-slate-500 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.published_at) }}</td>
-                <td class="px-2 sm:px-4 py-3 text-right whitespace-nowrap">
-                  <button
-                    type="button"
-                    @click="openEdit(r)"
-                    class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark hover:bg-brand-teal/10 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200"
-                    title="Editar"
-                    aria-label="Editar"
+          <div
+            v-else-if="resources.length === 0"
+            key="empty"
+            class="text-center py-16 text-slate-500 bg-white rounded-xl"
+          >
+            No hay recursos que coincidan con la búsqueda.
+          </div>
+
+          <div
+            v-else
+            :key="`page-${transitionKey}`"
+            class="bg-white rounded-xl shadow-sm overflow-hidden"
+          >
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-100 text-slate-600 text-left">
+                  <tr>
+                    <th class="px-3 sm:px-4 py-3 font-semibold">Título</th>
+                    <th class="px-4 py-3 font-semibold hidden sm:table-cell">Tema</th>
+                    <th class="px-4 py-3 font-semibold hidden md:table-cell">Autor</th>
+                    <th class="px-4 py-3 font-semibold hidden lg:table-cell">Publicado</th>
+                    <th class="px-3 sm:px-4 py-3 font-semibold text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <TransitionGroup tag="tbody" name="row" appear>
+                  <tr
+                    v-for="(r, i) in resources"
+                    :key="r.id"
+                    :style="{ '--i': Math.min(i, 10) }"
+                    class="border-t border-slate-100 hover:bg-slate-50 transition-colors duration-200"
                   >
-                    <IconEdit :size="18" />
-                    <span class="hidden sm:inline">Editar</span>
-                  </button>
-                  <button
-                    type="button"
-                    @click="confirmDelete(r)"
-                    class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 hover:bg-red-50 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200 sm:ml-1"
-                    title="Eliminar"
-                    aria-label="Eliminar"
-                  >
-                    <IconTrash :size="18" />
-                    <span class="hidden sm:inline">Eliminar</span>
-                  </button>
-                </td>
-              </tr>
-            </TransitionGroup>
-          </table>
-        </div>
+                    <td class="px-3 sm:px-4 py-3 min-w-[10rem]">
+                      <p class="font-medium text-brand-dark">{{ r.title }}</p>
+                      <p class="text-xs text-slate-500 line-clamp-1">{{ r.excerpt }}</p>
+                      <p class="text-xs text-slate-400 mt-1 sm:hidden">{{ r.topic?.name }}</p>
+                      <p class="text-xs text-slate-400 mt-1 lg:hidden">{{ formatDate(r.published_at) }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-slate-700 hidden sm:table-cell">{{ r.topic?.name }}</td>
+                    <td class="px-4 py-3 text-slate-700 hidden md:table-cell">{{ r.author?.name }}</td>
+                    <td class="px-4 py-3 text-slate-500 whitespace-nowrap hidden lg:table-cell">{{ formatDate(r.published_at) }}</td>
+                    <td class="px-2 sm:px-4 py-3 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        @click="openEdit(r)"
+                        class="inline-flex items-center gap-1 text-brand-teal hover:text-brand-dark hover:bg-brand-teal/10 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200"
+                        title="Editar"
+                        aria-label="Editar"
+                      >
+                        <IconEdit :size="18" />
+                        <span class="hidden sm:inline">Editar</span>
+                      </button>
+                      <button
+                        type="button"
+                        @click="confirmDelete(r)"
+                        class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 hover:bg-red-50 active:scale-95 p-2 sm:px-2 sm:py-1 rounded transition duration-200 sm:ml-1"
+                        title="Eliminar"
+                        aria-label="Eliminar"
+                      >
+                        <IconTrash :size="18" />
+                        <span class="hidden sm:inline">Eliminar</span>
+                      </button>
+                    </td>
+                  </tr>
+                </TransitionGroup>
+              </table>
+            </div>
+          </div>
+        </Transition>
       </div>
+
+      <Transition name="pager">
+        <nav
+          v-if="lastPage > 1 && !error"
+          class="mt-4 sm:mt-6 flex items-center justify-center gap-1 flex-wrap"
+          aria-label="Paginación"
+        >
+          <button
+            type="button"
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1 || loading"
+            class="pager-btn"
+            aria-label="Página anterior"
+          >
+            <IconChevronLeft :size="16" />
+          </button>
+
+          <template v-for="(p, i) in pageNumbers" :key="i">
+            <span v-if="p === '…'" class="px-2 py-1.5 text-slate-400 select-none">…</span>
+            <button
+              v-else
+              type="button"
+              @click="goToPage(p)"
+              :disabled="loading"
+              class="pager-btn"
+              :class="p === currentPage
+                ? 'bg-brand-teal text-brand-dark font-semibold shadow-sm shadow-brand-teal/30'
+                : 'text-slate-600 hover:text-brand-dark hover:bg-slate-100'"
+              :aria-current="p === currentPage ? 'page' : undefined"
+            >
+              {{ p }}
+            </button>
+          </template>
+
+          <button
+            type="button"
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === lastPage || loading"
+            class="pager-btn"
+            aria-label="Página siguiente"
+          >
+            <IconChevronRight :size="16" />
+          </button>
+        </nav>
+      </Transition>
     </main>
 
     <AppFooter />
@@ -314,7 +417,7 @@ onMounted(async () => {
     <Transition name="modal">
       <div
         v-if="showModal"
-        class="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-40"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-2 sm:p-4 z-[60]"
         @click.self="closeModal"
       >
         <div class="modal-panel bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
@@ -427,7 +530,7 @@ onMounted(async () => {
     <Transition name="modal">
       <div
         v-if="showConfirm"
-        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[70]"
         @click.self="cancelDelete"
       >
         <div class="modal-panel bg-white rounded-xl shadow-xl w-full max-w-sm max-h-[95vh] overflow-y-auto p-5 sm:p-6 text-center">
@@ -467,7 +570,7 @@ onMounted(async () => {
     <Transition name="toast">
       <div
         v-if="toast"
-        class="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-50 px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-center sm:text-left"
+        class="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 z-[80] px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-center sm:text-left"
         :class="toast.type === 'error' ? 'bg-red-600 text-white' : 'bg-brand-dark text-slate-100'"
       >
         {{ toast.message }}
@@ -498,6 +601,35 @@ onMounted(async () => {
 .row-enter-from,
 .row-leave-to {
   opacity: 0;
+}
+
+.page-fade-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.page-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.pager-enter-active,
+.pager-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pager-enter-from,
+.pager-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .modal-enter-active,
@@ -532,6 +664,15 @@ onMounted(async () => {
   transform: translateY(14px);
 }
 
+.progress-bar {
+  animation: progress-bar 1s linear infinite;
+}
+
+@keyframes progress-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -552,5 +693,28 @@ onMounted(async () => {
     opacity: 1;
     transform: none;
   }
+}
+</style>
+
+<style>
+.pager-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pager-btn:not(:disabled):active {
+  transform: scale(0.92);
+}
+
+.pager-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>
