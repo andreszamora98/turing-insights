@@ -3,15 +3,27 @@ import { ref, watch } from 'vue'
 import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { IconBrain, IconLayoutDashboard, IconLogout, IconUser, IconMenu2, IconX } from '@tabler/icons-vue'
 import { useAuth } from '../composables/useAuth'
+import { useSectionNav } from '../composables/useSectionNav'
 
 const router = useRouter()
 const route = useRoute()
 const { isAuthenticated, isAdmin, user, logout } = useAuth()
+const { goToSection, goHome } = useSectionNav()
 
 const menuOpen = ref(false)
 
 function closeMenu() {
   menuOpen.value = false
+}
+
+function onHome() {
+  closeMenu()
+  goHome()
+}
+
+function onSection(hash) {
+  closeMenu()
+  goToSection(hash)
 }
 
 watch(() => route.fullPath, closeMenu)
@@ -26,30 +38,33 @@ async function onLogout() {
 <template>
   <header class="bg-brand-dark text-slate-100 relative">
     <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
-      <RouterLink to="/" class="group flex items-center gap-2" @click="closeMenu">
+      <a href="/" class="group flex items-center gap-2" @click.prevent="onHome">
         <IconBrain
           :size="26"
           class="text-brand-teal transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110"
         />
         <span class="font-bold text-lg">TuringInsights</span>
-      </RouterLink>
+      </a>
 
       <nav class="hidden lg:flex items-center gap-6 text-sm">
-        <RouterLink
-          to="/"
+        <a
+          href="/"
           class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+          @click.prevent="onHome"
         >
           Inicio
-        </RouterLink>
+        </a>
         <a
           href="/#recursos"
           class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+          @click.prevent="onSection('#recursos')"
         >
           Recursos
         </a>
         <a
           href="/#temas"
           class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
+          @click.prevent="onSection('#temas')"
         >
           Temas
         </a>
@@ -108,19 +123,19 @@ async function onLogout() {
         class="lg:hidden border-t border-white/10 max-h-[70vh] overflow-y-auto"
       >
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
-          <RouterLink
-            to="/"
+          <a
+            href="/"
             class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
             style="--i: 0"
-            @click="closeMenu"
+            @click.prevent="onHome"
           >
             Inicio
-          </RouterLink>
+          </a>
           <a
             href="/#recursos"
             class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
             style="--i: 1"
-            @click="closeMenu"
+            @click.prevent="onSection('#recursos')"
           >
             Recursos
           </a>
@@ -128,7 +143,7 @@ async function onLogout() {
             href="/#temas"
             class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
             style="--i: 2"
-            @click="closeMenu"
+            @click.prevent="onSection('#temas')"
           >
             Temas
           </a>
