@@ -12,6 +12,14 @@ const router = useRouter()
 const { isAuthenticated } = useAuth()
 const loaded = ref(false)
 const showLoginNotice = ref(false)
+const imageFailed = ref(false)
+
+const fallback = '/images/fallback-cover.jpg'
+
+function resolveCover(resource) {
+  if (imageFailed.value) return fallback
+  return resource.cover_url || fallback
+}
 
 function onReadClick(event) {
   if (isAuthenticated.value) return
@@ -41,13 +49,13 @@ function formatDate(value) {
   <article class="group bg-white rounded-xl shadow-sm overflow-hidden flex flex-col transition duration-300 hover:-translate-y-1 hover:shadow-lg">
     <div class="h-48 overflow-hidden bg-slate-200" :class="{ 'animate-pulse': !loaded }">
       <img
-        :src="resource.cover_url || '/images/covers/fallback.jpg'"
+        :src="resolveCover(resource)"
         :alt="resource.title"
         class="w-full h-full object-cover transition duration-700 group-hover:scale-105"
         :class="loaded ? 'opacity-100' : 'opacity-0'"
         loading="lazy"
         @load="loaded = true"
-        @error="loaded = true"
+        @error="imageFailed = true; loaded = true"
       />
     </div>
 

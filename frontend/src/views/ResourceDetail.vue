@@ -10,7 +10,14 @@ const route = useRoute()
 const resource = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const coverLoaded = ref(false)
+const imageFailed = ref(false)
+
+const fallback = '/images/fallback-cover.jpg'
+
+function resolveCover() {
+  if (imageFailed.value) return fallback
+  return resource.value?.cover_url || fallback
+}
 
 function formatDate(value) {
   if (!value) return ''
@@ -80,12 +87,10 @@ onMounted(async () => {
           style="--i: 1"
         >
           <img
-            :src="resource.cover_url"
+            :src="resolveCover()"
             :alt="resource.title"
-            class="w-full h-full object-cover transition-opacity duration-700"
-            :class="coverLoaded ? 'opacity-100' : 'opacity-0'"
-            @load="coverLoaded = true"
-            @error="coverLoaded = true"
+            class="w-full h-44 sm:h-60 md:h-72 object-cover rounded-xl mb-8"
+            @error="imageFailed = true"
           />
         </div>
 
