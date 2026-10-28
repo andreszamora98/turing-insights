@@ -8,7 +8,7 @@ import { useSectionNav } from '../composables/useSectionNav'
 const router = useRouter()
 const route = useRoute()
 const { isAuthenticated, isAdmin, user, logout } = useAuth()
-const { goToSection, goHome } = useSectionNav()
+const { goHome } = useSectionNav()
 
 const menuOpen = ref(false)
 
@@ -21,11 +21,6 @@ function onHome() {
   goHome()
 }
 
-function onSection(hash) {
-  closeMenu()
-  goToSection(hash)
-}
-
 watch(() => route.fullPath, closeMenu)
 
 async function onLogout() {
@@ -36,7 +31,7 @@ async function onLogout() {
 </script>
 
 <template>
-  <header class="bg-brand-dark text-slate-100 relative">
+  <header class="bg-brand-dark text-slate-100 sticky top-0 z-50">
     <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
       <a href="/" class="group flex items-center gap-2" @click.prevent="onHome">
         <IconBrain
@@ -47,28 +42,6 @@ async function onLogout() {
       </a>
 
       <nav class="hidden lg:flex items-center gap-6 text-sm">
-        <a
-          href="/"
-          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
-          @click.prevent="onHome"
-        >
-          Inicio
-        </a>
-        <a
-          href="/#recursos"
-          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
-          @click.prevent="onSection('#recursos')"
-        >
-          Recursos
-        </a>
-        <a
-          href="/#temas"
-          class="relative hover:text-brand-teal transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-0 after:bg-brand-teal after:transition-all after:duration-300 hover:after:w-full"
-          @click.prevent="onSection('#temas')"
-        >
-          Temas
-        </a>
-
         <template v-if="isAuthenticated">
           <span class="inline-flex items-center gap-1.5 text-slate-300">
             <IconUser :size="16" />
@@ -123,35 +96,10 @@ async function onLogout() {
         class="lg:hidden border-t border-white/10 max-h-[70vh] overflow-y-auto"
       >
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1 text-sm">
-          <a
-            href="/"
-            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-            style="--i: 0"
-            @click.prevent="onHome"
-          >
-            Inicio
-          </a>
-          <a
-            href="/#recursos"
-            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-            style="--i: 1"
-            @click.prevent="onSection('#recursos')"
-          >
-            Recursos
-          </a>
-          <a
-            href="/#temas"
-            class="menu-item px-2 py-3 rounded-md hover:bg-white/5 hover:text-brand-teal transition"
-            style="--i: 2"
-            @click.prevent="onSection('#temas')"
-          >
-            Temas
-          </a>
-
           <template v-if="isAuthenticated">
             <span
-              class="menu-item inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 border-t border-white/10 mt-1"
-              style="--i: 3"
+              class="menu-item inline-flex items-center gap-1.5 px-2 py-3 text-slate-300"
+              style="--i: 0"
             >
               <IconUser :size="16" />
               {{ user?.name }}
@@ -161,7 +109,7 @@ async function onLogout() {
               v-if="isAdmin"
               to="/admin"
               class="menu-item inline-flex items-center justify-center gap-1.5 bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light active:scale-95 transition"
-              style="--i: 4"
+              style="--i: 1"
               @click="closeMenu"
             >
               <IconLayoutDashboard :size="16" />
@@ -172,7 +120,7 @@ async function onLogout() {
               type="button"
               @click="onLogout"
               class="menu-item inline-flex items-center gap-1.5 px-2 py-3 text-slate-300 hover:text-brand-teal transition"
-              style="--i: 5"
+              style="--i: 2"
             >
               <IconLogout :size="16" />
               Cerrar sesión
@@ -182,8 +130,8 @@ async function onLogout() {
           <RouterLink
             v-else
             to="/login"
-            class="menu-item text-center bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light active:scale-95 transition mt-1"
-            style="--i: 3"
+            class="menu-item text-center bg-brand-teal text-brand-dark font-semibold px-3 py-2.5 rounded-md hover:bg-brand-teal-light active:scale-95 transition"
+            style="--i: 0"
             @click="closeMenu"
           >
             Iniciar sesión

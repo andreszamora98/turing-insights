@@ -31,7 +31,7 @@ const router = createRouter({
           return
         }
         if (to.hash && document.querySelector(to.hash)) {
-          resolve({ el: to.hash, behavior: 'smooth' })
+          resolve({ el: to.hash, top: 80, behavior: 'smooth' })
           return
         }
         resolve({ top: 0 })

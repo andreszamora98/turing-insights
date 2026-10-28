@@ -96,7 +96,7 @@ onMounted(() => fetchResources({ reset: true }))
         <TopicCards :topics="topics" :active="filters.topic" @select="selectTopic" />
       </section>
 
-      <section id="recursos" class="max-w-6xl mx-auto px-4 pb-6 sm:pb-8 scroll-mt-4">
+      <section id="recursos" class="max-w-6xl mx-auto px-4 pb-6 sm:pb-8 scroll-mt-24">
         <RevealOnScroll>
           <FilterBar
             :filters="filters"

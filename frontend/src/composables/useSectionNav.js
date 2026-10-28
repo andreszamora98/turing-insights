@@ -1,24 +1,44 @@
+import { nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export function useSectionNav() {
   const route = useRoute()
   const router = useRouter()
 
-  function goToSection(hash) {
-    if (route.name === 'home') {
-      const el = document.querySelector(hash)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      return
-    }
-    router.push({ name: 'home', hash })
+  function scrollToId(id) {
+    const el = document.getElementById(id)
+    if (!el) return
+    const header = document.querySelector('header')
+    const offset = header ? header.getBoundingClientRect().height : 72
+    const top = el.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
   }
 
-  function goHome() {
-    if (route.name === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+  async function goToSection(hash) {
+    const id = hash.replace(/^#/, '')
+    const cleanHash = `#${id}`
+
+    if (route.path !== '/') {
+      await router.push({ path: '/', hash: cleanHash })
+      await nextTick()
+      requestAnimationFrame(() => scrollToId(id))
       return
     }
-    router.push({ name: 'home' })
+
+    if (route.hash !== cleanHash) {
+      await router.replace({ path: route.path, hash: cleanHash }).catch(() => {})
+    }
+
+    // Esto corre en CADA clic, no solo cuando cambia el hash
+    scrollToId(id)
+  }
+
+  async function goHome() {
+    if (route.path !== '/') {
+      await router.push('/')
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return { goToSection, goHome }

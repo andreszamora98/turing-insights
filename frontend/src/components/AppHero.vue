@@ -1,3 +1,9 @@
+<script setup>
+import { useSectionNav } from '../composables/useSectionNav'
+
+const { goToSection } = useSectionNav()
+</script>
+
 <template>
   <section id="inicio" class="relative overflow-hidden bg-brand-dark text-slate-100">
     <div
@@ -20,13 +26,14 @@
         Recursos técnicos sobre transformación digital, analítica, cloud y desarrollo
         para impulsar tu carrera y la de tu equipo.
       </p>
-      <a
-        href="#recursos"
+      <button
+        type="button"
         class="hero-rise inline-block bg-brand-teal text-brand-dark font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg hover:bg-brand-teal-light hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand-teal/20 active:scale-95 transition duration-200"
         style="--i: 2"
+        @click="goToSection('#recursos')"
       >
         Explorar recursos
-      </a>
+      </button>
     </div>
   </section>
 </template>
