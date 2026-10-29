@@ -8,7 +8,7 @@ import AppHeader from '../components/AppHeader.vue'
 import AppFooter from '../components/AppFooter.vue'
 
 const contactEmail = 'contacto@turing-ia.com'
-const githubUrl = 'https://github.com/tu-usuario/turing-insights'
+const githubUrl = 'https://github.com/andreszamora98/turing-insights'
 
 const emptyForm = () => ({ name: '', email: '', subject: 'consulta', message: '' })
 
